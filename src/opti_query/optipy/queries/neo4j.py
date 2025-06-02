@@ -32,7 +32,7 @@ class Neo4jOpeningQueryRunner(Neo4jQueryRunner):
     def build_queries(self) -> typing.List[str]:
         return [
             """
-            CALL {
+            CALL () {
                 CALL apoc.meta.stats() YIELD labels, relTypes
                 UNWIND keys(labels) AS label
                 WITH 'node_count' AS section, label AS name, labels[label] AS count, relTypes
