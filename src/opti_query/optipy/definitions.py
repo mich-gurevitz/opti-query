@@ -4,8 +4,7 @@ import typing
 
 from pydantic import BaseModel
 
-from OptiQuery.src.optipy.exceptions import OutOfSchemaRequest
-
+from .exceptions import OutOfSchemaRequest
 
 class OptiModel(BaseModel):
     @classmethod

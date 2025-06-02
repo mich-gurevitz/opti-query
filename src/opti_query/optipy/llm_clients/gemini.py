@@ -42,16 +42,16 @@ class GeminiClient(ILLMClient):
             msg_from_llm = self._send_msg(history=history, msg=msg_to_llm)
 
     def _send_msg(self, *, history: typing.List[ContentDict], msg: str) -> typing.Mapping[str, typing.Any]:
-        print("user says:")
-        self.pprint(msg)
-        print()
+        # print("user says:")
+        # self.pprint(msg)
+        # print()
         chat_session = self._model.start_chat(history=history)
         response = chat_session.send_message(msg)
         text = response.text[7:-4]
         msg_from_llm = json.loads(text)
-        print("llm says:")
-        self.pprint(msg_from_llm)
-        print()
+        # print("llm says:")
+        # self.pprint(msg_from_llm)
+        # print()
         history.append(ContentDict(role="user", parts=[msg]))
         history.append(ContentDict(role="model", parts=[response.text]))
         return msg_from_llm

@@ -1,11 +1,11 @@
-from OptiQuery.src.optipy.definitions import (
+from .definitions import (
     DbContext,
     DB_TYPE_TO_SYSTEM_INSTRUCTIONS,
     LlmTypes,
     DbTypes,
     OptimizationResponse,
 )
-from OptiQuery.src.optipy.llm_clients.base import LLM_TYPE_TO_LLM_CLIENT
+from .llm_clients.base import LLM_TYPE_TO_LLM_CLIENT
 
 
 class OptiQueryHandler:
@@ -22,6 +22,7 @@ class OptiQueryHandler:
         llm_type: LlmTypes,
         **llm_auth,
     ) -> OptimizationResponse:
+        # print(llm_auth)
         db_context = DbContext(host=host, username=username, password=password, database=database)
         system_instruction = DB_TYPE_TO_SYSTEM_INSTRUCTIONS[db_type]
         llm_client_cls = LLM_TYPE_TO_LLM_CLIENT[llm_type]

@@ -2,7 +2,7 @@ from contextlib import contextmanager
 
 from neo4j import GraphDatabase, READ_ACCESS
 
-from OptiQuery.src.optipy.definitions import DbContext
+from ..definitions import DbContext
 
 
 class Neo4jUtils:

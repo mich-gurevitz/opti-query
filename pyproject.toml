@@ -3,3 +3,34 @@ line-length = 170
 
 [tool.ruff]
 line-length = 170
+
+[project]
+name = "optiquery"
+version = "0.1.0"
+description = "AI-powered database query optimization CLI"
+authors = [
+  { name = "Michael Gurevitz", email = "gurevitz15@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.8"
+
+dependencies = [
+  "pydantic",
+  "google-generativeai",
+  "neo4j",
+  "questionary"
+]
+
+[project.scripts]
+optiquery = "opti_query.cli:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["opti_py"]
