@@ -12,7 +12,7 @@ class ILLMClient(abc.ABC):
         LLM_TYPE_TO_LLM_CLIENT[cls.get_llm_type()] = cls
 
     @abc.abstractmethod
-    def __init__(self, *, system_instruction: str, **llm_auth) -> None:
+    def __init__(self, *, system_instruction: str, model_name: str, **llm_auth) -> None:
         raise NotImplementedError
 
     @classmethod

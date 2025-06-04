@@ -13,10 +13,12 @@ class Database(BaseModel):
     db_type: DbTypes
     friendly_name: str
 
+
 class AiProvider(BaseModel):
     llm_type: LlmTypes
     llm_auth: typing.Mapping[str, str]
     friendly_name: str
+    model_name: str
 
 
 class ProviderManager:
@@ -31,8 +33,22 @@ class ProviderManager:
         cls._DATABASES[db.friendly_name] = db
 
     @classmethod
+    def update_database(cls, *, db: Database) -> None:
+        if db.friendly_name not in cls._DATABASES.keys():
+            raise Exception(f"Database {db.friendly_name} already exists")
+
+        cls._DATABASES[db.friendly_name] = db
+
+    @classmethod
     def add_ai_provider(cls, *, ai_provider: AiProvider) -> None:
         if ai_provider.friendly_name in cls._AI_PROVIDERS.keys():
+            raise Exception(f"AI provider {ai_provider.friendly_name} already exists")
+
+        cls._AI_PROVIDERS[ai_provider.friendly_name] = ai_provider
+
+    @classmethod
+    def update_ai_provider(cls, *, ai_provider: AiProvider) -> None:
+        if ai_provider.friendly_name not in cls._AI_PROVIDERS.keys():
             raise Exception(f"AI provider {ai_provider.friendly_name} already exists")
 
         cls._AI_PROVIDERS[ai_provider.friendly_name] = ai_provider

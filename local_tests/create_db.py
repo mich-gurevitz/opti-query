@@ -2,29 +2,86 @@ import random
 
 from neo4j import GraphDatabase, ManagedTransaction
 
-from opti_query.cli_utils import ProviderManager
+from opti_query.optipy.definitions import DbTypes, LlmTypes
+from opti_query.optipy.hanlder import OptiQueryHandler
 
 # Neo4j connection info
 NEO4J_URI = "neo4j+ssc://e7544395.databases.neo4j.io"
 NEO4J_USER = "neo4j"
 NEO4J_PASSWORD = "TjTTXTYzsk8GUmV4BRCITZ0lEJ-C_Lds4GcxCUaCht8"
-API_KEY = "AIzaSyA1UseCuLXOYyhuoHWA8GlAG0JAqIxNhoU"
+GEMINI_API_KEY = "AIzaSyA1UseCuLXOYyhuoHWA8GlAG0JAqIxNhoU"
+CHATGPT_API_KEY = (
+    "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"
+)
+model_name = "gemini-1.5-flash"
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-query = "MATCH (child:Child)-[:LIVES_IN]->(country:Country) WHERE child.gender = 'Male' RETURN child.name AS name, country.name AS country_name"
+query = "MATCH (child:Child)-[]-(country:Country) WHERE child.gender = 'Male' RETURN child.name AS name, country.name AS country_name"
 
 # Expanded sample data
 countries = [
-    "USA", "Germany", "Japan", "Brazil", "India", "Canada", "France", "UK", "Italy", "Australia",
-    "Spain", "Mexico", "South Korea", "Netherlands", "Sweden", "Switzerland", "Norway", "Russia",
-    "China", "Argentina", "South Africa", "Turkey", "Poland", "Indonesia", "Thailand",
-    "Vietnam", "New Zealand", "Israel", "Egypt", "Greece"
+    "USA",
+    "Germany",
+    "Japan",
+    "Brazil",
+    "India",
+    "Canada",
+    "France",
+    "UK",
+    "Italy",
+    "Australia",
+    "Spain",
+    "Mexico",
+    "South Korea",
+    "Netherlands",
+    "Sweden",
+    "Switzerland",
+    "Norway",
+    "Russia",
+    "China",
+    "Argentina",
+    "South Africa",
+    "Turkey",
+    "Poland",
+    "Indonesia",
+    "Thailand",
+    "Vietnam",
+    "New Zealand",
+    "Israel",
+    "Egypt",
+    "Greece",
 ]
 
 occupations = [
-    "Engineer", "Doctor", "Teacher", "Artist", "Chef", "Developer", "Nurse", "Scientist",
-    "Writer", "Mechanic", "Pilot", "Electrician", "Plumber", "Dentist", "Architect",
-    "Lawyer", "Musician", "Pharmacist", "Psychologist", "Veterinarian", "Accountant", "Journalist",
-    "Police Officer", "Firefighter", "Bartender", "Designer", "Translator", "Economist", "Analyst", "Salesperson"
+    "Engineer",
+    "Doctor",
+    "Teacher",
+    "Artist",
+    "Chef",
+    "Developer",
+    "Nurse",
+    "Scientist",
+    "Writer",
+    "Mechanic",
+    "Pilot",
+    "Electrician",
+    "Plumber",
+    "Dentist",
+    "Architect",
+    "Lawyer",
+    "Musician",
+    "Pharmacist",
+    "Psychologist",
+    "Veterinarian",
+    "Accountant",
+    "Journalist",
+    "Police Officer",
+    "Firefighter",
+    "Bartender",
+    "Designer",
+    "Translator",
+    "Economist",
+    "Analyst",
+    "Salesperson",
 ]
 
 genders = ["Male", "Female", "Non-Binary", "Other", "Prefer Not to Say"]
@@ -44,7 +101,7 @@ def create_countries(tx):
             name=country,
             pop=random.randint(5_000_000, 300_000_000),
             code=country[:3].upper(),
-            continent=random.choice(["Asia", "Europe", "North America", "South America", "Africa", "Oceania"])
+            continent=random.choice(["Asia", "Europe", "North America", "South America", "Africa", "Oceania"]),
         )
 
 
@@ -54,7 +111,7 @@ def create_occupations(tx):
             "CREATE (:Occupation {name: $name, industry: $industry, avg_salary: $salary})",
             name=job,
             industry=random.choice(["Tech", "Health", "Art", "Education", "Trades", "Law", "Finance", "Media"]),
-            salary=random.randint(25_000, 200_000)
+            salary=random.randint(25_000, 200_000),
         )
 
 
@@ -72,7 +129,7 @@ def create_people(tx, start, end):
             "gender": gender,
             "country_name": country,
             "email": f"user{i}@example.com",
-            "active": random.choice([True, False])
+            "active": random.choice([True, False]),
         }
 
         if is_child:
@@ -91,7 +148,7 @@ def create_people(tx, start, end):
             CREATE (p{labels} $props)-[:LIVES_IN]->(c)
             """,
             country=country,
-            props=props
+            props=props,
         )
 
         if not is_child and random.random() < 0.5:
@@ -102,7 +159,7 @@ def create_people(tx, start, end):
                 CREATE (p)-[:WORKS_AS]->(o)
                 """,
                 id=person_id,
-                occ=occupation
+                occ=occupation,
             )
 
 
@@ -181,10 +238,19 @@ def main():
     #     session.execute_write(create_people, start, end)
     query1 = "MATCH (child:Child {gender: 'Male'})-[]-(Country) RETURN child.name AS child_name, country.name AS country_name"
     query2 = "MATCH (person:Person)-[]->(occupation:Occupation) RETURN distinct occupation.name"
+
     query3 = "MATCH (o:Occupation)<-[:WORKS_AS]-(p:Person) WITH p MATCH (p)-[:LIVES_IN]->(c:Country) RETURN p.name AS person_name, c.name AS country_name"
-    # OptiQueryHandler.optimize_query(db_type=DbTypes.NEO4J, host=NEO4J_URI, password=NEO4J_PASSWORD, username=NEO4J_USER, database="neo4j", llm_type=LlmTypes.GEMINI,
-    #                                 api_key=API_KEY, query=query1)
-    ProviderManager.list_dbs()
+    OptiQueryHandler.optimize_query(
+        db_type=DbTypes.NEO4J,
+        host=NEO4J_URI,
+        password=NEO4J_PASSWORD,
+        username=NEO4J_USER,
+        database="neo4j",
+        llm_type=LlmTypes.CHATGPT,
+        api_key=CHATGPT_API_KEY,
+        query=query1,
+        model_name="o3-2025-04-16",
+    )
     # print("✅ Finished paginated generation!")
 
 
