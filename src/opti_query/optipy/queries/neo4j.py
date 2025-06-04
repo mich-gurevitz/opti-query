@@ -185,7 +185,12 @@ class Neo4jExplainQueryRunner(Neo4jQueryRunner):
         return [f"EXPLAIN {self.query}"]
 
     def get_parsed_response(self, *, db_context: DbContext) -> str:
-        plan = next(self._run_query(db_context=db_context))
+        try:
+            plan = next(self._run_query(db_context=db_context))
+
+        except Exception as e:
+            return f"Error in your explain request: {e}"
+
         return plan["args"]["string-representation"]
 
     @classmethod

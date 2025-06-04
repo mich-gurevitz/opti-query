@@ -20,7 +20,7 @@ class Neo4jUtils:
                 yield tx
 
             except Exception as e:
-                return f"Please try again, error was raised while running query: {e}. \nThe error might be related to you."
+                raise
 
             finally:
                 tx.close()

@@ -1,5 +1,6 @@
 import json
 import typing
+from json import JSONDecodeError
 
 import google.generativeai as genai
 from google.api_core.exceptions import NotFound
@@ -51,8 +52,14 @@ class GeminiClient(ILLMClient):
         except NotFound as e:
             raise UnsupportedModelName(model_name=self._model_name, llm_type=LlmTypes.GEMINI.value.title()) from e
 
-        text = response.text[7:-4]
-        msg_from_llm = json.loads(text)
+        try:
+            text = response.text[7:-4]
+            msg_from_llm = json.loads(text)
+
+        except JSONDecodeError as e:
+            text = response.text
+            msg_from_llm = json.loads(text)
+
         history.append(ContentDict(role="user", parts=[msg]))
         history.append(ContentDict(role="model", parts=[response.text]))
         return msg_from_llm
