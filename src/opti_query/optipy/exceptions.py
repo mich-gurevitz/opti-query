@@ -19,3 +19,7 @@ class UnsupportedModelName(Exception):
     @property
     def llm_type(self) -> str:
         return self._llm_type
+
+
+class LlmReachedTryCount(Exception):
+    pass

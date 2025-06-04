@@ -1,5 +1,6 @@
 import json
 import typing
+from json import JSONDecodeError
 
 from openai import OpenAI, NotFoundError
 
@@ -40,7 +41,7 @@ class ChatGPTClient(ILLMClient):
 
             msg_from_llm = self._send_msg(msg=msg_to_llm)
 
-    def _send_msg(self, *, msg: str) -> typing.Mapping[str, typing.Any]:
+    def _send_msg(self, *, msg: str, try_count: int = 0) -> typing.Mapping[str, typing.Any]:
         self._conversation_history.append({"role": "user", "content": msg})
         try:
             response = self._client.chat.completions.create(
@@ -52,8 +53,14 @@ class ChatGPTClient(ILLMClient):
             raise UnsupportedModelName(model_name=self._model_name, llm_type=LlmTypes.CHATGPT.value.title()) from e
 
         text = response.choices[0].message.content
-        msg_from_llm = json.loads(text)
-        self._conversation_history.append({"role": "assistant", "content": text})
+        try:
+            msg_from_llm = json.loads(text)
+
+        except JSONDecodeError as e:
+            self._conversation_history.append({"role": "assistant", "content": text})
+            failed_to_parse_msg = "Your message is not a valid json. Please send only a **valid json** message."
+            return self._send_msg(msg=failed_to_parse_msg, try_count=try_count + 1)
+
         return msg_from_llm
 
     @classmethod

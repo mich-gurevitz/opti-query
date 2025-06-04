@@ -6,7 +6,7 @@ import questionary
 from opti_query.optipy.definitions import LlmTypes, DbTypes, OptimizationResponse
 from opti_query.optipy.hanlder import OptiQueryHandler
 from .struct import ProviderManager, AiProvider, Database
-from ..optipy.exceptions import UnsupportedModelName
+from ..optipy.exceptions import UnsupportedModelName, LlmReachedTryCount
 
 
 class OptiQueryCliRunner:
@@ -70,7 +70,13 @@ class OptiQueryCliRunner:
     @classmethod
     def _update_database(cls) -> None:
         cls._clear_screen()
-        friendly_name = questionary.select("Select a database to update:", choices=ProviderManager.list_dbs()).ask()
+        dbs = ProviderManager.list_dbs()
+        if not dbs:
+            print("No databases were found. Please configure a database first.")
+            input("Press Enter to continue...")
+            return
+
+        friendly_name = questionary.select("Select a database to update:", choices=dbs).ask()
         db_type = ProviderManager.get_database(db=friendly_name).db_type
         uri = questionary.text("Enter the database URI (e.g., bolt://localhost:7687):").ask()
         username = questionary.text("Username:").ask()
@@ -105,7 +111,13 @@ class OptiQueryCliRunner:
     @classmethod
     def _update_provider(cls) -> None:
         cls._clear_screen()
-        friendly_name = questionary.select("Select an AI provider to update:", choices=ProviderManager.list_ai_providers()).ask()
+        providers = ProviderManager.list_ai_providers()
+        if not providers:
+            print("No AI providers were found. Please configure an AI providers first.")
+            input("Press Enter to continue...")
+            return
+
+        friendly_name = questionary.select("Select an AI provider to update:", choices=providers).ask()
         llm_type = ProviderManager.get_ai_provider(ai_provider=friendly_name).llm_type
         model_name = questionary.text("Model Name:").ask()
         token = questionary.password("Enter API token for the provider:").ask()
@@ -165,6 +177,9 @@ class OptiQueryCliRunner:
             cls._clear_screen()
             print(f"\nThe model '{e.model_name}' is not supported for the selected AI provider ({e.llm_type}).")
             print("Please configure a different model or update the existing provider.")
+
+        except LlmReachedTryCount as e:
+            print("LLM failed to optimize query, please try again.")
 
         except Exception as e:
             print("An error occurred:")

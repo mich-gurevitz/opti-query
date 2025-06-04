@@ -11,10 +11,7 @@ class Neo4jUtils:
     def acquire_tx(cls, *, db_context: DbContext):
         driver = GraphDatabase.driver(db_context.host, auth=(db_context.username, db_context.password))
         with driver.session(default_access_mode=READ_ACCESS, database=db_context.database) as session:
-            try:
-                tx = session.begin_transaction()
-            except Exception as e:
-                print(f"Failed to acquire transaction: {e}")
+            tx = session.begin_transaction()
 
             try:
                 yield tx

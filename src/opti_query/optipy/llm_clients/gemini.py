@@ -8,7 +8,7 @@ from google.generativeai.types import ContentDict
 
 from .base import ILLMClient
 from ..definitions import DbContext, LlmTypes, OptimizationResponse, DbTypes
-from ..exceptions import OutOfSchemaRequest, UnsupportedModelName
+from ..exceptions import OutOfSchemaRequest, UnsupportedModelName, LlmReachedTryCount
 
 
 class GeminiClient(ILLMClient):
@@ -44,7 +44,7 @@ class GeminiClient(ILLMClient):
 
             msg_from_llm = self._send_msg(history=history, msg=msg_to_llm)
 
-    def _send_msg(self, *, history: typing.List[ContentDict], msg: str) -> typing.Mapping[str, typing.Any]:
+    def _send_msg(self, *, history: typing.List[ContentDict], msg: str, try_count: int = 0) -> typing.Mapping[str, typing.Any]:
         chat_session = self._model.start_chat(history=history)
         try:
             response = chat_session.send_message(msg)
@@ -58,7 +58,18 @@ class GeminiClient(ILLMClient):
 
         except JSONDecodeError as e:
             text = response.text
-            msg_from_llm = json.loads(text)
+            try:
+                msg_from_llm = json.loads(text)
+
+            except JSONDecodeError as e:
+                if try_count > 5:
+                    raise LlmReachedTryCount
+
+                history.append(ContentDict(role="user", parts=[msg]))
+                history.append(ContentDict(role="model", parts=[response.text]))
+                failed_to_parse_msg = "Your message is not a valid json. Please send only a **valid json** message."
+                return self._send_msg(history=history, msg=failed_to_parse_msg, try_count=try_count + 1)
+
 
         history.append(ContentDict(role="user", parts=[msg]))
         history.append(ContentDict(role="model", parts=[response.text]))

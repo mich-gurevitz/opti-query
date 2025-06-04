@@ -23,7 +23,6 @@ class OptiQueryHandler:
         model_name: str,
         **llm_auth,
     ) -> OptimizationResponse:
-        # print(llm_auth)
         db_context = DbContext(host=host, username=username, password=password, database=database)
         system_instruction = DB_TYPE_TO_SYSTEM_INSTRUCTIONS[db_type]
         llm_client_cls = LLM_TYPE_TO_LLM_CLIENT[llm_type]
