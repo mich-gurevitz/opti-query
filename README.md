@@ -30,7 +30,7 @@ Or clone locally:
 ```bash
 git clone https://github.com/mich-gurevitz/opti-query
 cd optiquery
-pip install -r requirements.txt
+make install-dev
 ```
 
 ---
