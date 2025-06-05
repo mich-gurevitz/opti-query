@@ -70,11 +70,6 @@ class GeminiClient(ILLMClient):
                 failed_to_parse_msg = "Your message is not a valid json. Please send only a **valid json** message."
                 return self._send_msg(history=history, msg=failed_to_parse_msg, try_count=try_count + 1)
 
-
         history.append(ContentDict(role="user", parts=[msg]))
         history.append(ContentDict(role="model", parts=[response.text]))
         return msg_from_llm
-
-    @classmethod
-    def pprint(cls, d):
-        print(json.dumps(d, sort_keys=True, indent=4))

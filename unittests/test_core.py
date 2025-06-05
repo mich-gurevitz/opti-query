@@ -75,9 +75,7 @@ class TestOptimizationResponse(unittest.TestCase):
         )
 
     def test_validate_request_missing_suggestions(self):
-        data: Dict[str, Any] = {
-            "optimized_queries_and_explains": [{"query": "test query", "explanation": "test explanation"}]
-        }
+        data: Dict[str, Any] = {"optimized_queries_and_explains": [{"query": "test query", "explanation": "test explanation"}]}
         with self.assertRaises(OutOfSchemaRequest) as context:
             OptimizationResponse.validate_request(data)
         self.assertEqual(

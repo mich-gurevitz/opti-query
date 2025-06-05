@@ -45,7 +45,7 @@ class ChatGPTClient(ILLMClient):
         self._conversation_history.append({"role": "user", "content": msg})
         try:
             response = self._client.chat.completions.create(
-                model=self._model_name,  # You can also use "gpt-3.5-turbo"
+                model=self._model_name,
                 messages=self._conversation_history,
             )
 
@@ -62,7 +62,3 @@ class ChatGPTClient(ILLMClient):
             return self._send_msg(msg=failed_to_parse_msg, try_count=try_count + 1)
 
         return msg_from_llm
-
-    @classmethod
-    def pprint(cls, d):
-        print(json.dumps(d, sort_keys=True, indent=4))
