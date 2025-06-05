@@ -65,6 +65,11 @@ Lint with pre-commit:
 ```bash
 make lint
 ```
+Run tests:
+
+```bash
+make tests
+```
 
 ---
 

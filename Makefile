@@ -6,3 +6,6 @@ install:
 
 install-dev:
 	pip install .[dev]
+
+tests:
+	pytest unittests

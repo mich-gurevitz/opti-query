@@ -41,6 +41,7 @@ dev = [
     "pre-commit",
     "pylint",
     "ruff",
-    "mypy"
+    "mypy",
+    "pytest"
 ]
 
